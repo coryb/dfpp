@@ -20,7 +20,14 @@ build:
 	cd src/github.com/coryb/dfpp; \
 	go get -v
 
+cross-setup:
+	for p in $(PLATFORMS); do \
+        echo "Building for $$p"; \
+		cd $(GOROOT)/src && sudo GOOS=$${p/-*/} GOARCH=$${p/*-/} bash ./make.bash --no-clean; \
+   done
+
 all:
+	rm -rf $(DIST); \
 	mkdir -p $(DIST); \
 	cd src/github.com/coryb/dfpp; \
 	go get -d; \
