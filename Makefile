@@ -39,12 +39,12 @@ all:
 fmt:
 	gofmt -s -w *.go
 
-CURVER := $(shell grep '\#\#' CHANGELOG.md  | awk '{print $$2; exit}')
-NEWVER := $(shell awk -F'"' '/docopt.Parse/{print $$2}' dfpp.go)
+CURVER ?= $(shell git fetch --tags && git tag | tail -1)
+NEWVER ?= $(shell echo $(CURVER) | awk -F. '{print $$1"."$$2"."$$3+1}')
 TODAY  := $(shell date +%Y-%m-%d)
 
 changes:
-	@git log --pretty=format:"* %s [%cn] [%h]" --no-merges ^$(CURVER) HEAD *.go | grep -v gofmt | grep -v "bump version"
+	@git log --pretty=format:"* %s [%cn] [%h]" --no-merges ^$(CURVER) HEAD *.go | grep -vE 'gofmt|go fmt'
 
 update-changelog: 
 	@echo "# Changelog" > CHANGELOG.md.new; \
