@@ -20,6 +20,9 @@ build:
 	cd src/github.com/coryb/dfpp; \
 	go get -v
 
+install:
+	export GOBIN=~/bin && ${MAKE} build
+
 cross-setup:
 	for p in $(PLATFORMS); do \
         echo "Building for $$p"; \

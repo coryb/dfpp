@@ -17,9 +17,19 @@ var log = logging.MustGetLogger("dfpp")
 var format = "%{color}%{time:2006-01-02T15:04:05.000Z07:00} %{level:-5s} [%{shortfile}]%{color:reset} %{message}"
 
 func main() {
-	if termutil.Isatty(os.Stdin.Fd()) {
+	if len(os.Args) == 1 && termutil.Isatty(os.Stdin.Fd()) {
 		Usage()
 		os.Exit(0)
+	}
+
+	var err error
+	inputFile := os.Stdin
+	if len(os.Args) > 1 {
+		inputFile, err = os.Open(os.Args[1])
+		if err != nil {
+			fmt.Println("Failed to read %s: %s", os.Args[1], err)
+			os.Exit(1)
+		}
 	}
 
 	logBackend := logging.NewLogBackend(os.Stderr, "", 0)
@@ -31,7 +41,7 @@ func main() {
 	)
 	logging.SetLevel(logging.DEBUG, "")
 
-	for line := range InstructionScanner(os.Stdin) {
+	for line := range InstructionScanner(inputFile) {
 		parts := strings.Fields(line)
 		if len(parts) > 0 {
 			instruction := parts[0]
