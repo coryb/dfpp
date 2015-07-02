@@ -6,12 +6,10 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	// "flag"
 	"fmt"
 	"bufio"
 	"runtime"
 	"strings"
-	// "github.com/droundy/goopt"
 	"github.com/andrew-d/go-termutil"
 )
 
