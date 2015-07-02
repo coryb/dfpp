@@ -1,16 +1,16 @@
 package main
 
 import (
+	"bufio"
+	"fmt"
+	"github.com/andrew-d/go-termutil"
 	"github.com/op/go-logging"
-	"os"
 	"io"
 	"io/ioutil"
 	"net/http"
-	"fmt"
-	"bufio"
+	"os"
 	"runtime"
 	"strings"
-	"github.com/andrew-d/go-termutil"
 )
 
 var log = logging.MustGetLogger("dfpp")
@@ -20,7 +20,7 @@ func main() {
 	if termutil.Isatty(os.Stdin.Fd()) {
 		Usage()
 		os.Exit(0)
-    }
+	}
 
 	logBackend := logging.NewLogBackend(os.Stderr, "", 0)
 	logging.SetBackend(
@@ -30,14 +30,14 @@ func main() {
 		),
 	)
 	logging.SetLevel(logging.DEBUG, "")
-	
+
 	for line := range InstructionScanner(os.Stdin) {
 		parts := strings.Fields(line)
 		if len(parts) > 0 {
 			instruction := parts[0]
 			if instruction == "INCLUDE" {
 				ProcessInclude(line, parts)
-				continue;
+				continue
 			}
 		}
 		fmt.Println(line)
@@ -49,9 +49,9 @@ func InstructionScanner(input io.Reader) chan string {
 	go func() {
 		scanner := bufio.NewScanner(input)
 		for scanner.Scan() {
-			line := scanner.Text();
-			for len(line)>0 && line[len(line)-1] == '\\' {
-				scanner.Scan();
+			line := scanner.Text()
+			for len(line) > 0 && line[len(line)-1] == '\\' {
+				scanner.Scan()
 				line += "\n" + scanner.Text()
 			}
 			ch <- line
@@ -65,12 +65,12 @@ func ProcessInclude(line string, fields []string) {
 	merge := false
 	exclude := make(map[string]bool)
 	include := make(map[string]bool)
-	
-	uris := make([]string,0, len(fields)-1)
+
+	uris := make([]string, 0, len(fields)-1)
 	for _, field := range fields {
 		if _, err := os.Stat(field); err == nil {
 			uris = append(uris, field)
-			continue;
+			continue
 		}
 		clude := include
 		if field[0] == '-' {
@@ -79,24 +79,42 @@ func ProcessInclude(line string, fields []string) {
 		}
 
 		switch field {
-        case "\\": continue
-		case "INCLUDE": continue
-		case "MERGE": merge = true
-		case "ADD": fallthrough
-		case "CMD": fallthrough
-		case "COPY": fallthrough
-		case "ENTRYPOINT": fallthrough
-		case "EVN": fallthrough
-		case "EXPOSE": fallthrough
-		case "FROM": fallthrough
-		case "LABEL": fallthrough
-		case "MAINTAINER": fallthrough
-		case "ONBUILD": fallthrough
-		case "RUN": fallthrough
-		case "USER": fallthrough
-		case "VOLUME": fallthrough
-		case "WORKDIR": clude[field] = true
-		default: uris = append(uris, field)
+		case "\\":
+			continue
+		case "INCLUDE":
+			continue
+		case "MERGE":
+			merge = true
+		case "ADD":
+			fallthrough
+		case "CMD":
+			fallthrough
+		case "COPY":
+			fallthrough
+		case "ENTRYPOINT":
+			fallthrough
+		case "EVN":
+			fallthrough
+		case "EXPOSE":
+			fallthrough
+		case "FROM":
+			fallthrough
+		case "LABEL":
+			fallthrough
+		case "MAINTAINER":
+			fallthrough
+		case "ONBUILD":
+			fallthrough
+		case "RUN":
+			fallthrough
+		case "USER":
+			fallthrough
+		case "VOLUME":
+			fallthrough
+		case "WORKDIR":
+			clude[field] = true
+		default:
+			uris = append(uris, field)
 		}
 	}
 
@@ -130,12 +148,12 @@ func ProcessInclude(line string, fields []string) {
 	}
 	Merge(merge, docs, include, exclude)
 }
-	
+
 func Merge(merge bool, docs []string, include, exclude map[string]bool) {
 	result := make([]*string, 0)
 	ops := make(map[string]*string)
 	for _, doc := range docs {
-		for line := range InstructionScanner( strings.NewReader(doc) ) {
+		for line := range InstructionScanner(strings.NewReader(doc)) {
 			fields := strings.Fields(line)
 			if len(fields) > 0 {
 				op := fields[0]
@@ -156,10 +174,10 @@ func Merge(merge bool, docs []string, include, exclude map[string]bool) {
 						// squash redundent apt-get updates
 						squash := "apt-get update"
 						if ix := strings.Index(*sref, squash); ix >= 0 {
-							rest := strings.Replace((*sref)[ix+len(squash):], squash, "echo skipping redundent apt-get-update", -1);
+							rest := strings.Replace((*sref)[ix+len(squash):], squash, "echo skipping redundent apt-get-update", -1)
 							*sref = (*sref)[0:ix+len(squash)] + rest
 						}
-						
+
 					} else {
 						dup := string(line)
 						result = append(result, &dup)
