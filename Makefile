@@ -42,7 +42,7 @@ all:
 fmt:
 	gofmt -s -w *.go main/*.go
 
-CURVER ?= $(shell git fetch --tags && git tag | tail -1)
+CURVER ?= $(shell git fetch --tags && git tag | gsort -V | tail -1)
 NEWVER ?= $(shell echo $(CURVER) | awk -F. '{print $$1"."$$2"."$$3+1}')
 TODAY  := $(shell date +%Y-%m-%d)
 
