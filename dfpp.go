@@ -15,7 +15,7 @@ import (
 var log = logging.MustGetLogger("dfpp")
 
 type Dfpp struct {
-	Processors map[string]func(string, []string)bool
+	Processors map[string]func(string, []string) bool
 	Output     io.Writer
 }
 
@@ -23,7 +23,7 @@ func NewDfpp() *Dfpp {
 	pp := &Dfpp{
 		Output: os.Stdout,
 	}
-	pp.Processors = map[string]func(string, []string) bool {
+	pp.Processors = map[string]func(string, []string) bool{
 		"INCLUDE": pp.ProcessInclude,
 	}
 	return pp
