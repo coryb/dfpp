@@ -15,7 +15,7 @@ import (
 var log = logging.MustGetLogger("dfpp")
 
 type Dfpp struct {
-	Processors map[string]func(string, []string)
+	Processors map[string]func(string, []string)bool
 	Output     io.Writer
 }
 
@@ -23,7 +23,7 @@ func NewDfpp() *Dfpp {
 	pp := &Dfpp{
 		Output: os.Stdout,
 	}
-	pp.Processors = map[string]func(string, []string){
+	pp.Processors = map[string]func(string, []string) bool {
 		"INCLUDE": pp.ProcessInclude,
 	}
 	return pp
@@ -35,8 +35,9 @@ func (pp *Dfpp) ProcessDockerfile(input io.Reader) {
 		if len(parts) > 0 {
 			instruction := parts[0]
 			if fn, ok := pp.Processors[instruction]; ok {
-				fn(line, parts)
-				continue
+				if fn(line, parts) {
+					continue
+				}
 			}
 		}
 		fmt.Fprintf(pp.Output, "%s\n", line)
@@ -60,7 +61,7 @@ func InstructionScanner(input io.Reader) chan string {
 	return ch
 }
 
-func (pp *Dfpp) ProcessInclude(line string, fields []string) {
+func (pp *Dfpp) ProcessInclude(line string, fields []string) bool {
 	merge := false
 	exclude := make(map[string]bool)
 	include := make(map[string]bool)
@@ -146,6 +147,7 @@ func (pp *Dfpp) ProcessInclude(line string, fields []string) {
 		}
 	}
 	pp.Merge(merge, docs, include, exclude)
+	return true
 }
 
 func (pp *Dfpp) Merge(merge bool, docs []string, include, exclude map[string]bool) {
