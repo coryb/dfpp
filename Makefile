@@ -73,4 +73,9 @@ docker:
 	mkdir -p docker-root/bin docker-root/etc/ssl/certs
 	/usr/bin/security find-certificate -a -p /System/Library/Keychains/SystemRootCertificates.keychain > docker-root/etc/ssl/certs/ca-certificates.crt
 	${MAKE} BIN=./docker-root/bin/$(NAME) GOOS=linux GOARCH=amd64 build
-	docker build -t coryb/dfpp:$(CURVER) .
+	docker build -t coryb/$(NAME):$(CURVER) .
+	docker tag coryb/$(NAME):$(CURVER) coryb/$(NAME):latest
+
+release: docker
+	docker push coryb/$(NAME):$(CURVER)
+	docker push coryb/$(NAME):latest

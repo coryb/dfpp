@@ -6,6 +6,13 @@ dfpp - Dockerfile preprocessor
 
      $ dfpp Dockerfile.pre > Dockerfile
 
+     # without installing run via docker:
+     $ docker run --rm -i -v $(pwd):/root:ro coryb/dfpp Dockerfile.pre > Dockerfile
+
+     # or alias dfpp to docker call
+     $ alias dfpp='docker run --rm -i -v $(pwd):/root:ro coryb/dfpp'
+     $ dfpp Dockerfile.pre > Dockerfile
+
      # Dockerfile Syntax:
      INCLUDE ./Dockerfile.inc
      INCLUDE http://path/to/Dockerfile.inc
