@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.1 - 2016-03-25
+
+* update to use gopkg, tweak build [Cory Bennett] [[e2a037e](https://github.com/coryb/dfpp/commit/e2a037e)]
+
 ## 0.0.3 - 2015-11-02
 
 * move main package into main/main.go [Cory Bennett] [[1f0e9bd](https://github.com/coryb/dfpp/commit/1f0e9bd)]
