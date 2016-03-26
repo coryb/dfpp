@@ -37,6 +37,8 @@ dfpp - Dockerfile preprocessor
 `dfpp` was written to allow simple pre-processing of Dockerfiles to add
 capabilities currently unsupported by docker build.
 
+The INCLUDE instruction is primarily useful to make Dockerfiles composible if you have wide variation in images being produced but you dont want to copy & paste common instructions.  For example, if you are using docker for build isolation where you have some projects that are c++ and some that are java.  Typically you would create a specific `cpp-build` image with all the c++ build dependencies and a `java-build` image with all the java build dependencies.  Then you find yourself needing to build something that requires both c++ AND java, so you create a `cpp-java-build` image . Now you are maintaining the c++ build deps in the `cpp-build` and `cpp-java-build` image.  INCLUDE allows you to maintain the build deps in a single location and simply reference that single location for both `cpp-build` and `cpp-java-build` images.
+
 # INSTRUCTIONS
 
 ## INCLUDE \[MERGE\] \[FILTERS\] \[file|uri\] ...
