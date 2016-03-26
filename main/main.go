@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/andrew-d/go-termutil"
-	"github.com/coryb/dfpp"
-	"github.com/op/go-logging"
+	"gopkg.in/coryb/dfpp.v1"
+	"gopkg.in/op/go-logging.v1"
 	"os"
 )
 

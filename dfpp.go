@@ -3,7 +3,7 @@ package dfpp
 import (
 	"bufio"
 	"fmt"
-	"github.com/op/go-logging"
+	"gopkg.in/op/go-logging.v1"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -123,7 +123,7 @@ func (pp *Dfpp) ProcessInclude(line string, fields []string) bool {
 		if _, err := os.Stat(uri); err == nil {
 			content, err := ioutil.ReadFile(uri)
 			if err != nil {
-				log.Error("Failed to read %s: %s", uri, err)
+				log.Errorf("Failed to read %s: %s", uri, err)
 				os.Exit(1)
 			}
 			docs = append(docs, string(content))
@@ -131,11 +131,11 @@ func (pp *Dfpp) ProcessInclude(line string, fields []string) bool {
 			req, _ := http.NewRequest("GET", uri, nil)
 			ua := &http.Client{}
 			if resp, err := ua.Do(req); err != nil {
-				log.Error("Failed to %s %s: %s", req.Method, req.URL.String(), err)
+				log.Errorf("Failed to %s %s: %s", req.Method, req.URL.String(), err)
 				os.Exit(1)
 			} else {
 				if resp.StatusCode < 200 || resp.StatusCode >= 300 && resp.StatusCode != 401 {
-					log.Error("response status: %s", resp.Status)
+					log.Errorf("response status: %s", resp.Status)
 				}
 				runtime.SetFinalizer(resp, func(r *http.Response) {
 					r.Body.Close()
