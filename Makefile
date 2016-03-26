@@ -10,7 +10,7 @@ DIST     = $(shell pwd)/dist
 GOPATH   = $(shell pwd)
 GOBIN   ?= $(shell pwd)
 BIN     ?= $(GOBIN)/$(NAME)
-CURVER  ?= $(shell git describe --abbrev=0 --tags)
+CURVER  ?= $(patsubst v%,%,$(shell git describe --abbrev=0 --tags))
 NEWVER  ?= $(shell echo $(CURVER) | awk -F. '{print $$1"."$$2"."$$3+1}')
 TODAY   := $(shell date +%Y-%m-%d)
 
@@ -67,10 +67,10 @@ update-changelog:
 	git tag v$(NEWVER)
 
 version:
-	@echo $(patsubst v%,%,$(CURVER))
+	@echo $(CURVER)
 
 docker:
 	mkdir -p docker-root/bin docker-root/etc/ssl/certs
 	/usr/bin/security find-certificate -a -p /System/Library/Keychains/SystemRootCertificates.keychain > docker-root/etc/ssl/certs/ca-certificates.crt
-	${MAKE} GOBIN=./docker-root/bin GOOS=linux GOARCH=amd64 build
-	docker build -t coryb/dfpp:$(patsubst v%,%,$(CURVER)) .
+	${MAKE} BIN=./docker-root/bin/$(NAME) GOOS=linux GOARCH=amd64 build
+	docker build -t coryb/dfpp:$(CURVER) .
