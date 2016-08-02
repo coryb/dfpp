@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2 - 2016-08-02
+
+* when merging ENV force use for KEY=VAL syntax [Cory Bennett] [[d0206d6](https://github.com/coryb/dfpp/commit/d0206d6)]
+
 ## 1.0.1 - 2016-03-25
 
 * update to use gopkg, tweak build [Cory Bennett] [[e2a037e](https://github.com/coryb/dfpp/commit/e2a037e)]
