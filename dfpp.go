@@ -167,7 +167,13 @@ func (pp *Dfpp) Merge(merge bool, docs []string, include, exclude map[string]boo
 				details := strings.TrimPrefix(line, fields[0]+" ")
 
 				if sref, ok := ops[op]; merge && ok {
-					if op == "ENV" || op == "LABEL" {
+					if op == "ENV" {
+						if !strings.Contains(details, "=") {
+							fields := strings.Fields(details)
+							details = strings.Join(fields, "=")
+						}
+						*sref += " \\\n" + strings.Repeat(" ", len(op)+1) + details
+					} else if op == "LABEL" {
 						*sref += " \\\n" + strings.Repeat(" ", len(op)+1) + details
 					} else if op == "RUN" {
 						*sref += " && \\\n    " + details
@@ -184,6 +190,12 @@ func (pp *Dfpp) Merge(merge bool, docs []string, include, exclude map[string]boo
 						result = append(result, &dup)
 					}
 				} else {
+					if op == "ENV" && !strings.Contains(line, "=") {
+						line = strings.TrimPrefix(line, "ENV")
+						line = strings.TrimSpace(line)
+						fields := strings.Fields(line)
+						line = fmt.Sprintf("ENV %s", strings.Join(fields, "="))
+					}
 					dup := string(line)
 					result = append(result, &dup)
 					ops[op] = result[len(result)-1]
