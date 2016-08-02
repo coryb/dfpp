@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.2 - 2016-08-02
+
+
 ## v1.0.1 - 2016-03-25
 
 * update to use gopkg, tweak build [Cory Bennett] [[e2a037e](https://github.com/coryb/dfpp/commit/e2a037e)]
