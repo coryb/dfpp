@@ -51,7 +51,7 @@ fmt:
 	gofmt -s -w *.go main/*.go
 
 changes:
-	@git log --pretty=format:"* %s [%cn] [%h]" --no-merges ^$(CURVER) HEAD main/*.go *.go | grep -vE 'gofmt|go fmt'
+	@git log --pretty=format:"* %s [%cn] [%h]" --no-merges ^v$(CURVER) HEAD main/*.go *.go | grep -vE 'gofmt|go fmt'
 
 update-changelog: 
 	@echo "# Changelog" > CHANGELOG.md.new; \
