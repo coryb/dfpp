@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.3 - 2017-06-27
+
+* add recursive handling for INCLUDE statements [Cory Bennett] [[b8d999b](https://github.com/coryb/dfpp/commit/b8d999b)]
+
 ## 1.0.2 - 2016-08-02
 
 * when merging ENV force use for KEY=VAL syntax [Cory Bennett] [[d0206d6](https://github.com/coryb/dfpp/commit/d0206d6)]
