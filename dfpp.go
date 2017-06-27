@@ -3,13 +3,14 @@ package dfpp
 import (
 	"bufio"
 	"fmt"
-	"gopkg.in/op/go-logging.v1"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"runtime"
 	"strings"
+
+	"gopkg.in/op/go-logging.v1"
 )
 
 var log = logging.MustGetLogger("dfpp")
@@ -87,6 +88,8 @@ func (pp *Dfpp) ProcessInclude(line string, fields []string) bool {
 			merge = true
 		case "ADD":
 			fallthrough
+		case "ARG":
+			fallthrough
 		case "CMD":
 			fallthrough
 		case "COPY":
@@ -150,6 +153,41 @@ func (pp *Dfpp) ProcessInclude(line string, fields []string) bool {
 	return true
 }
 
+type stringListReader struct {
+	lines     []*string
+	lineIndex int
+	offset    int
+}
+
+func (s *stringListReader) Read(p []byte) (n int, err error) {
+	want := cap(p)
+	readBytes := 0
+	for want > 0 {
+		if s.lineIndex >= len(s.lines) {
+			return readBytes, io.EOF
+		}
+		line := s.lines[s.lineIndex]
+		remainder := len(*line) - s.offset
+		if remainder > want {
+			copy(p[readBytes:], (*line)[s.offset:want])
+			s.offset += want
+			readBytes += want - s.offset
+			want = 0
+		} else {
+			copy(p[readBytes:], (*line)[s.offset:])
+			readBytes += remainder
+			s.offset = 0
+			s.lineIndex++
+			want -= remainder
+			// memory buffer was split on new lines, so make sure to add
+			// the newlines back on the output merged document.
+			copy(p[readBytes:], "\n")
+			readBytes++
+		}
+	}
+	return readBytes, nil
+}
+
 func (pp *Dfpp) Merge(merge bool, docs []string, include, exclude map[string]bool) {
 	result := make([]*string, 0)
 	ops := make(map[string]*string)
@@ -203,7 +241,6 @@ func (pp *Dfpp) Merge(merge bool, docs []string, include, exclude map[string]boo
 			}
 		}
 	}
-	for _, line := range result {
-		fmt.Fprintf(pp.Output, "%s\n", *line)
-	}
+
+	pp.ProcessDockerfile(&stringListReader{lines: result})
 }
