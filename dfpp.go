@@ -5,27 +5,59 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"runtime"
 	"strings"
-
-	"gopkg.in/op/go-logging.v1"
 )
 
-var log = logging.MustGetLogger("dfpp")
+type Logger interface {
+	Errorf(format string, args ...interface{})
+}
+
+type defaultLogger struct{}
+
+func (l *defaultLogger) Errorf(format string, args ...interface{}) {
+	log.Printf(format, args...)
+}
+
+type HttpClient interface {
+	Do(*http.Request) (*http.Response, error)
+}
 
 type Dfpp struct {
 	Processors map[string]func(string, []string) bool
 	Output     io.Writer
+	client     HttpClient
+	logger     Logger
 }
 
-func NewDfpp() *Dfpp {
+type Option func(pp *Dfpp)
+
+func WithClient(c HttpClient) Option {
+	return func(pp *Dfpp) {
+		pp.client = c
+	}
+}
+
+func WithLogger(l Logger) Option {
+	return func(pp *Dfpp) {
+		pp.logger = l
+	}
+}
+
+func NewDfpp(opts ...Option) *Dfpp {
 	pp := &Dfpp{
 		Output: os.Stdout,
+		client: &http.Client{},
+		logger: &defaultLogger{},
 	}
 	pp.Processors = map[string]func(string, []string) bool{
 		"INCLUDE": pp.ProcessInclude,
+	}
+	for _, optFunc := range opts {
+		optFunc(pp)
 	}
 	return pp
 }
@@ -126,19 +158,18 @@ func (pp *Dfpp) ProcessInclude(line string, fields []string) bool {
 		if _, err := os.Stat(uri); err == nil {
 			content, err := ioutil.ReadFile(uri)
 			if err != nil {
-				log.Errorf("Failed to read %s: %s", uri, err)
+				pp.logger.Errorf("Failed to read %s: %s", uri, err)
 				os.Exit(1)
 			}
 			docs = append(docs, string(content))
 		} else {
 			req, _ := http.NewRequest("GET", uri, nil)
-			ua := &http.Client{}
-			if resp, err := ua.Do(req); err != nil {
-				log.Errorf("Failed to %s %s: %s", req.Method, req.URL.String(), err)
+			if resp, err := pp.client.Do(req); err != nil {
+				pp.logger.Errorf("Failed to %s %s: %s", req.Method, req.URL.String(), err)
 				os.Exit(1)
 			} else {
 				if resp.StatusCode < 200 || resp.StatusCode >= 300 && resp.StatusCode != 401 {
-					log.Errorf("response status: %s", resp.Status)
+					pp.logger.Errorf("response status: %s", resp.Status)
 				}
 				runtime.SetFinalizer(resp, func(r *http.Response) {
 					r.Body.Close()
