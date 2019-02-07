@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.4 - 2019-02-07
+
+* add Options to configure how dfpp works, allow customizing logger and http client used [Cory Bennett] [[3b0a7ea](https://github.com/coryb/dfpp/commit/3b0a7ea)]
+
 ## 1.0.3 - 2017-06-27
 
 * add recursive handling for INCLUDE statements [Cory Bennett] [[b8d999b](https://github.com/coryb/dfpp/commit/b8d999b)]
