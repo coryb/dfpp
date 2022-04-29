@@ -1,23 +1,23 @@
 PLATFORMS= \
 	freebsd-amd64 \
 	linux-amd64 \
+	linux-arm64 \
 	windows-amd64 \
 	darwin-amd64 \
+	darwin-arm64 \
 	$(NULL)
 
 NAME     = dfpp
 DIST     = $(shell pwd)/dist
-GOPATH   = $(shell pwd)
 GOBIN   ?= $(shell pwd)
 BIN     ?= $(GOBIN)/$(NAME)
 CURVER  ?= $(patsubst v%,%,$(shell git describe --abbrev=0 --tags))
 NEWVER  ?= $(shell echo $(CURVER) | awk -F. '{print $$1"."$$2"."$$3+1}')
 TODAY   := $(shell date +%Y-%m-%d)
-
-export GOPATH
+DOCKER_OPTS := 
 
 build: src/gopkg.in/coryb/dfpp.v1
-	go build -ldflags "-w -s" -o $(BIN) main/main.go
+	CGO_ENABLED=false go build -ldflags "-w -s" -o $(BIN) main/main.go
 
 src/%:
 	mkdir -p $(@D)
@@ -69,13 +69,11 @@ update-changelog:
 version:
 	@echo $(CURVER)
 
-docker:
+docker: all
 	mkdir -p docker-root/bin docker-root/etc/ssl/certs
 	/usr/bin/security find-certificate -a -p /System/Library/Keychains/SystemRootCertificates.keychain > docker-root/etc/ssl/certs/ca-certificates.crt
-	${MAKE} BIN=./docker-root/bin/$(NAME) GOOS=linux GOARCH=amd64 build
-	docker build -t coryb/$(NAME):$(CURVER) .
-	docker tag coryb/$(NAME):$(CURVER) coryb/$(NAME):latest
+	docker buildx build $(DOCKER_OPTS) --platform=linux/amd64,linux/arm64 -t coryb/$(NAME):$(CURVER) .
+	docker buildx build $(DOCKER_OPTS) --platform=linux/amd64,linux/arm64 -t coryb/$(NAME):latest .
 
 release: docker
-	docker push coryb/$(NAME):$(CURVER)
-	docker push coryb/$(NAME):latest
+	$(MAKE) docker DOCKER_OPTS=--push
