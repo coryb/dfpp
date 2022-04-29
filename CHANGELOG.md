@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.5 - 2022-04-29
+
+* updated for linux/arm64
+
 ## 1.0.4 - 2019-02-07
 
 * add Options to configure how dfpp works, allow customizing logger and http client used [Cory Bennett] [[3b0a7ea](https://github.com/coryb/dfpp/commit/3b0a7ea)]
